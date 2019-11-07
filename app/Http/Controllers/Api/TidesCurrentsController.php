@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Locations;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Validator;
 
 class TidesCurrentsController extends Controller
@@ -18,6 +19,9 @@ class TidesCurrentsController extends Controller
         $begin = $input['begin'];
         $end = $input['end'];
         $total_records = $input['total'];
+
+        Log::useDailyFiles(storage_path().'/logs/api.log');
+        Log::info("[Begining....]");
 
         $location = Locations::getLocationByCode($code);
 
@@ -38,7 +42,8 @@ class TidesCurrentsController extends Controller
             $tc_results = DB::select("SELECT * FROM ". self::getTableName(substr($date, 0, 4) + 1, $location) . " WHERE location = ? AND date >= ? limit ?,?", [$location, $date, 0, $total_records - $records]);
             self::add_to_array($tc_results, $results);
         }
-        
+
+        Log::info("[Ending....]");
         return response()->json(self::getTidesCurrentData($results, $begin, $end), 200);
     }
     
