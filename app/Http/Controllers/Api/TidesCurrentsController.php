@@ -21,7 +21,8 @@ class TidesCurrentsController extends Controller
         $total_records = $input['total'];
 
         Log::useDailyFiles(storage_path().'/logs/api.log');
-        Log::info("[Begining....]");
+        Log::info("[Get Tide Current By Date Begining....]");  
+        Log::info("IP: " . \Request::ip() . " - Code: " . $code . " - Date: " . $date . " - Begin: " . $begin . " - End: " . $end . " - Total Records: " . $total_records);     
 
         $location = Locations::getLocationByCode($code);
 
@@ -43,7 +44,8 @@ class TidesCurrentsController extends Controller
             self::add_to_array($tc_results, $results);
         }
 
-        Log::info("[Ending....]");
+        Log::info("[Get Tide Current By Date Ending....]"); 
+
         return response()->json(self::getTidesCurrentData($results, $begin, $end), 200);
     }
     
@@ -55,6 +57,10 @@ class TidesCurrentsController extends Controller
         $begin = $input['begin'];
         $end = $input['end'];
         $total_records = $input['total'];
+
+        Log::useDailyFiles(storage_path().'/logs/api.log');
+        Log::info("[Get Prev Tide Current By Date Begining....]");  
+        Log::info("IP: " . \Request::ip() . " - Code: " . $code . " - Date: " . $date . " - Begin: " . $begin . " - End: " . $end . " - Total Records: " . $total_records);     
         
         $location = Locations::getLocationByCode($code);
 
@@ -76,6 +82,8 @@ class TidesCurrentsController extends Controller
             $tc_results = DB::select("SELECT * FROM ". self::getTableName(substr($date, 0, 4) + 1, $location) . " WHERE location = ? AND date > ? AND date <= ? limit ?,?", [$location, $end_date, $date, 0, $total_records - $records]);
             self::add_to_array($tc_results, $results);
         }
+
+        Log::info("[Get Prev Tide Current By Date Ending....]");
 
         return response()->json(self::getTidesCurrentData($results, $begin, $end), 200);
     }
@@ -324,6 +332,10 @@ class TidesCurrentsController extends Controller
     {
 	    $input = $request->all();
         $code = $input['code'];      
+
+        Log::useDailyFiles(storage_path().'/logs/api.log');
+        Log::info("[Get Info Location Begining....]");  
+        Log::info("IP: " . \Request::ip() . " - Code: " . $code);     
         
         $location = Locations::getLocationByCode($code);
 
@@ -337,12 +349,18 @@ class TidesCurrentsController extends Controller
 	    $results['latitude'] = $location->latitude;
 	    $results['longitude'] = $location->longitude;
         
+        Log::info("[Get Info Location Ending....]");
+
         return response()->json($results, 200);
 	}
 	
     public function get_near_locations(Request $request)
     {
-	    $input = $request->all();       
+        $input = $request->all();       
+        
+        Log::useDailyFiles(storage_path().'/logs/api.log');
+        Log::info("[Get Near Locations Begining....]");  
+        Log::info("IP: " . \Request::ip() . " - Longitude: " . $input['long']);     
 
         $rules = [
             'long' => 'required|string'
@@ -363,7 +381,8 @@ class TidesCurrentsController extends Controller
 	    
 	    $name = str_replace(["Current"], "", explode(",", $location->name));
         $results = Locations::getLocationByName(trim($name[sizeof($name)-1]), 'Current', '');
-  
+        Log::info("[Get Near Locations Ending....]"); 
+
         return response()->json($results, 200);
 	}
 }
